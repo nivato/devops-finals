@@ -37,3 +37,16 @@ module "cluster" {
   name_prefix = local.prefix
   subnet_ids = [module.vpc.first_private_subnet_id, module.vpc.second_private_subnet_id]
 }
+
+module "node_group" {
+  source = "./modules/eks-node-group"
+  providers = {
+    aws = aws.frankfurt
+  }
+  name_prefix = local.prefix
+  cluster_name = module.cluster.cluster_name
+  subnet_ids = [module.vpc.first_private_subnet_id, module.vpc.second_private_subnet_id]
+  desired_size = 2
+  max_size = 2
+  min_size = 2
+}
