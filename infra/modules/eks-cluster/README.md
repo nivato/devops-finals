@@ -1,3 +1,3 @@
-# vpc
+# eks-cluster
 
-A module to create AWS VPC, AWS Public and Private Subnets
+A module to create AWS EKS Cluster
