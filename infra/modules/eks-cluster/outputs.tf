@@ -18,18 +18,10 @@ output "public_subnet_id" {
   value = aws_subnet.public_subnet.id
 }
 
-output "first_private_subnet_arn" {
-  value = aws_subnet.first_private_subnet.arn
+output "private_subnet_arn" {
+  value = aws_subnet.private_subnet.arn
 }
 
-output "first_private_subnet_id" {
-  value = aws_subnet.first_private_subnet.id
-}
-
-output "second_private_subnet_arn" {
-  value = aws_subnet.second_private_subnet.arn
-}
-
-output "second_private_subnet_id" {
-  value = aws_subnet.second_private_subnet.id
+output "private_subnet_id" {
+  value = aws_subnet.private_subnet.id
 }
