@@ -71,7 +71,7 @@ resource "aws_eks_addon" "vpc_cni" {
 resource "aws_eks_addon" "coredns" {
   cluster_name = aws_eks_cluster.created_cluster.name
   addon_name = "coredns"
-  addon_version = "v1.10.1-eksbuild.1"
+  addon_version = "v1.10.1-eksbuild.2"
 }
 
 resource "aws_eks_addon" "kube_proxy" {
