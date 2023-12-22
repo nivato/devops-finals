@@ -68,6 +68,7 @@ resource "aws_eks_addon" "vpc_cni" {
   addon_version = "v1.14.1-eksbuild.1"
 }
 
+# TODO: This one requires Node Group to compete creation
 resource "aws_eks_addon" "coredns" {
   cluster_name = aws_eks_cluster.created_cluster.name
   addon_name = "coredns"
