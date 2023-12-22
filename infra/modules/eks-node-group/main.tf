@@ -72,3 +72,10 @@ resource "aws_eks_node_group" "created_node_group" {
     Name = local.group_name
   }
 }
+
+resource "aws_eks_addon" "coredns" {
+  cluster_name = var.cluster_name
+  addon_name = "coredns"
+  addon_version = "v1.10.1-eksbuild.2"
+  depends_on = [aws_eks_node_group.created_node_group]
+}
