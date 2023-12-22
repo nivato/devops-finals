@@ -31,8 +31,5 @@ module "eks_cluster" {
     aws = aws.frankfurt
   }
   name_prefix = "devops-finals"
-  vpc_cidr_block = "10.10.0.0/16"
-  public_subnet_cidr_block = "10.10.1.0/24"
-  private_subnet_cidr_block = "10.10.2.0/24"
   subnet_ids = [module.vpc.first_private_subnet_id, module.vpc.second_private_subnet_id]
 }

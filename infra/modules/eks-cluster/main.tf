@@ -116,6 +116,6 @@ resource "aws_eks_cluster" "created_cluster" {
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
     aws_iam_role_policy_attachment.cluster_policy_attachment,
-    aws_iam_role_policy_attachment.example-AmazonEKSVPCResourceController,
+#    aws_iam_role_policy_attachment.example-AmazonEKSVPCResourceController, TODO: figure out what is this
   ]
 }
