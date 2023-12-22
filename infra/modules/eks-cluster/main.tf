@@ -46,6 +46,8 @@ resource "aws_eks_cluster" "created_cluster" {
   name = local.cluster_name
   role_arn = aws_iam_role.eks_cluster_role.arn
   vpc_config {
+    endpoint_public_access = true
+    endpoint_private_access = true
     subnet_ids = var.subnet_ids
   }
   enabled_cluster_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
@@ -55,4 +57,31 @@ resource "aws_eks_cluster" "created_cluster" {
     aws_iam_role_policy_attachment.cluster_policy_attachment,
     aws_cloudwatch_log_group.eks_log_group
   ]
+  tags = {
+    Name = local.cluster_name
+  }
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = aws_eks_cluster.created_cluster.name
+  addon_name = "vpc-cni"
+  addon_version = "v1.14.1-eksbuild.1"
+}
+
+resource "aws_eks_addon" "coredns" {
+  cluster_name = aws_eks_cluster.created_cluster.name
+  addon_name = "coredns"
+  addon_version = "v1.10.1-eksbuild.1"
+}
+
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name = aws_eks_cluster.created_cluster.name
+  addon_name = "kube-proxy"
+  addon_version = "v1.28.1-eksbuild.1"
+}
+
+resource "aws_eks_addon" "pod_identity_agent" {
+  cluster_name = aws_eks_cluster.created_cluster.name
+  addon_name = "eks-pod-identity-agent"
+  addon_version = "v1.0.0-eksbuild.1"
 }
