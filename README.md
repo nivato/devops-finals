@@ -48,3 +48,24 @@ terraform init
 terraform plan
 terraform apply
 ```
+
+### 3. Connect to the EKS Cluster with `kubectl`
+1. Install `kubectl`:
+```shell
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+# Download the public signing key for the Kubernetes package repositories
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+# Add the appropriate Kubernetes apt repository
+# This overwrites any existing configuration in /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubectl
+kubectl version --client
+```
+2. Now, configure `kubectl` to connect to our `eks-cluster`:
+```shell
+aws eks update-kubeconfig --region eu-central-1 --name eks-cluster --profile terraform
+# > Added new context arn:aws:eks:eu-central-1:YOUR_AWS_ACCOUNT_ID:cluster/eks-cluster to /home/user/.kube/config
+kubectl get nodes
+```
