@@ -54,7 +54,7 @@ metadata:
   annotations:
     # Captured groups ( ) are saved in numbered placeholders, chronologically, in the form $1, $2 ... $n.
     # These placeholders can be used as parameters in the rewrite-target annotation.
-    nginx.ingress.kubernetes.io/rewrite-target: /$1$1
+    nginx.ingress.kubernetes.io/rewrite-target: /$1$2
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
