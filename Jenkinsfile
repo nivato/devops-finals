@@ -99,6 +99,7 @@ pipeline {
                     try {
                         docker.withRegistry('', 'dockerhub_nazarivato') {
                             dockerImage.push()
+                            dockerImage.push('v1.0')
                             dockerImage.push('latest')
                         }
                     } catch (err) {
@@ -114,6 +115,7 @@ pipeline {
             script {
                 try {
                     sh "docker rmi ${dockerRepo}:${dockerTag}"
+                    sh "docker rmi ${dockerRepo}:v1.0"
                     sh "docker rmi ${dockerRepo}:latest"
                     sh 'docker images'
                 } catch (err) {
