@@ -52,40 +52,19 @@ metadata:
   name: prod-ingress
   namespace: prod
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    # Captured groups ( ) are saved in numbered placeholders, chronologically, in the form $1, $2 ... $n.
+    # These placeholders can be used as parameters in the rewrite-target annotation.
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
-    nginx.ingress.kubernetes.io/affinity: "cookie"
 spec:
   ingressClassName: nginx
   rules:
     - host: {{ J2.INGRESS_LOAD_BALANCER_URL }}
       http:
         paths:
-          - path: /open-weather-icons/.*
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: north-service
-                port:
-                  number: 80
-          - path: /stylesheets/.*
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: south-service
-                port:
-                  number: 80
-          - path: /images/.*
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: west-service
-                port:
-                  number: 80
 {% for DIRECTION in ['north', 'south', 'west', 'east'] %}
-          - path: /{{ DIRECTION }}
-            pathType: Prefix
+          - path: (/{{ DIRECTION }})(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ DIRECTION }}-service
