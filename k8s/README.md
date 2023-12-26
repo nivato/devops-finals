@@ -14,13 +14,9 @@ j2 --version
 ```
 * On Jenkins:
 ```shell
-sudo su - jenkins
-pip install j2cli
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> .bashrc
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> .bash_profile
-# Re-login session
+sudo -H pip install --force-reinstall j2cli
 j2 --version
-j2cli 0.3.10, Jinja2 2.10.1
+# > j2cli 0.3.10, Jinja2 3.1.2
 ```
 
 ### 2. Generate yaml manifest
