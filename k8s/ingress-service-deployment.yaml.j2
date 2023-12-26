@@ -62,62 +62,26 @@ spec:
     - host: {{ J2.INGRESS_LOAD_BALANCER_URL }}
       http:
         paths:
-          - path: /(images/.*)
+{%
+     for MAPPING in [
+         {'path': 'images/', 'direction': 'north'},
+         {'path': 'open-weather-icons/', 'direction': 'south'},
+         {'path': 'stylesheets/', 'direction': 'west'},
+         {'path': 'js/', 'direction': 'east'},
+         {'path': 'api/', 'direction': 'north'},
+         {'path': 'info', 'direction': 'south'},
+         {'path': 'tools', 'direction': 'west'},
+         {'path': 'monitor', 'direction': 'east'},
+    ]
+%}
+          - path: /({{ MAPPING.path }}.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: north-service
+                name: {{ MAPPING.direction }}-service
                 port:
                   number: 80
-          - path: /(open-weather-icons/.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: south-service
-                port:
-                  number: 80
-          - path: /(stylesheets/.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: west-service
-                port:
-                  number: 80
-          - path: /(info.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: east-service
-                port:
-                  number: 80
-          - path: /(js/.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: north-service
-                port:
-                  number: 80
-          - path: /(api/.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: south-service
-                port:
-                  number: 80
-          - path: /(tools.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: west-service
-                port:
-                  number: 80
-          - path: /(monitor.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: east-service
-                port:
-                  number: 80
+{% endfor %}
 {% for DIRECTION in ['north', 'south', 'west', 'east'] %}
           - path: /{{ DIRECTION }}
             pathType: ImplementationSpecific
