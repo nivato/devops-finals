@@ -83,35 +83,28 @@ spec:
                 name: west-service
                 port:
                   number: 80
-          - path: /info
-            pathType: Prefix
+          - path: /(info.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: east-service
                 port:
                   number: 80
-          - path: /tools
-            pathType: Prefix
+          - path: /(tools.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: north-service
                 port:
                   number: 80
-          - path: /monitor
-            pathType: Prefix
+          - path: /(monitor.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: south-service
                 port:
                   number: 80
 {% for DIRECTION in ['north', 'south', 'west', 'east'] %}
-          - path: /{{ DIRECTION }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ DIRECTION }}-service
-                port:
-                  number: 80
           - path: /{{ DIRECTION }}/(.*)
             pathType: ImplementationSpecific
             backend:
