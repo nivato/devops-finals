@@ -64,7 +64,7 @@ pipeline {
                             def expectedContents = "This is a simple Node.js web app using the Express framework and EJS templates."
                             def errorLog = "/var/log/nginx/error.log"
                             def internalPortResponse = sh(
-                                script: "wget -S -O - http://${ipAddress}:80/",
+                                script: "wget -q -S -O - http://${ipAddress}:80/ 2>&1",
                                 returnStdout: true,
                             ).trim()
                             echo "internalPortResponse: ${internalPortResponse}"
@@ -74,7 +74,7 @@ pipeline {
                                 error("Invalid response when calling 'http://${ipAddress}:80/' URL")
                             }
                             def mappedPortResponse = sh(
-                                script: "wget -S -O - http://127.0.0.1:9090/",
+                                script: "wget -q -S -O - http://127.0.0.1:9090/ 2>&1",
                                 returnStdout: true,
                             ).trim()
                             echo "mappedPortResponse: ${mappedPortResponse}"
