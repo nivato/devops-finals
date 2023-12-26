@@ -89,6 +89,9 @@ pipeline {
                         sh 'ls -lah'
                         sh 'find . -type f -not -path "*/.git/*"'
                         sh 'docker --version'
+                        sh "aws --version"
+                        sh "kubectl version --client"
+                        sh "j2 --version"
                     } catch (err) {
                         echo "${err.getMessage()}"
                         error("'Debug Info' Stage Failed - ${err.getMessage()}")
@@ -196,13 +199,23 @@ pipeline {
                 script {
                     try {
                         dir('k8s'){
-                            withAWS(credentials: 'terraform-aws-user') {
-                                sh "aws --version"
-                                sh "aws iam list-users --no-cli-pager"
-                                sh "kubectl version --client"
-                                sh "j2 --version"
-                                sh "export INGRESS_LOAD_BALANCER_URL=blah; j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml"
+                            withAWS(credentials: 'terraform-aws-user'){
+                                sh "aws eks update-kubeconfig --region eu-central-1 --name devops-finals-cluster"
+                                def ingressLoadBalancerUrl = sh(
+                                    script: '''
+                                        kubectl get services --all-namespaces | grep ingress-nginx | grep LoadBalancer | awk '{print $5}'
+                                    ''',
+                                    returnStdout: true,
+                                ).trim()
+                                echo "ingressLoadBalancerUrl: ${ingressLoadBalancerUrl}"
+                                sh """
+                                    export INGRESS_LOAD_BALANCER_URL=${ingressLoadBalancerUrl}
+                                    j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml
+                                """
                                 sh "cat ingress-service-deployment.yaml"
+                                sh "kubectl apply -f ingress-service-deployment.yaml"
+                                sh "kubectl get services --namespace=prod"
+                                echo "Load Balancer URL: http://${ingressLoadBalancerUrl}"
                             }
                         }
                     } catch (err) {
@@ -222,6 +235,12 @@ pipeline {
                         sh "docker rmi ${dockerRepo}:v1.0 || true"
                         sh "docker rmi ${dockerRepo}:latest || true"
                         sh 'docker images'
+                    }
+                    if (changesInDir('k8s')){
+                        sh "kubectl config unset clusters || true"
+                        sh "kubectl config unset users || true"
+                        sh "kubectl config unset contexts || true"
+                        sh "kubectl config unset current-context || true"
                     }
                 } catch (err) {
                     echo "${err.getMessage()}"
