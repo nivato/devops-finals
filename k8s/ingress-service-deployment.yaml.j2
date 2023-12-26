@@ -54,7 +54,7 @@ metadata:
   annotations:
     # Captured groups ( ) are saved in numbered placeholders, chronologically, in the form $1, $2 ... $n.
     # These placeholders can be used as parameters in the rewrite-target annotation.
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
@@ -62,7 +62,7 @@ spec:
     - host: {{ J2.INGRESS_LOAD_BALANCER_URL }}
       http:
         paths:
-          - path: (/)(.*)
+          - path: /(.*)
             pathType: ImplementationSpecific
             backend:
               service:
@@ -70,7 +70,7 @@ spec:
                 port:
                   number: 80
 {% for DIRECTION in ['north', 'south', 'west', 'east'] %}
-          - path: (/{{ DIRECTION }})(.*)
+          - path: /{{ DIRECTION }}(.*)
             pathType: ImplementationSpecific
             backend:
               service:
