@@ -189,16 +189,21 @@ pipeline {
         stage('Deploy to EKS'){
             when {
                 expression {
-                    changesInDir('k8s')
+                    changesInAnyOfDirs([appDir, 'k8s'])
                 }
             }
             steps {
                 script {
                     try {
                         dir('k8s'){
-                            sh "j2 --version"
-                            sh "export INGRESS_LOAD_BALANCER_URL=blah; j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml"
-                            sh "cat ingress-service-deployment.yaml"
+                            withAWS(credentials: 'terraform-aws-user') {
+                                sh "aws --version"
+                                sh "aws iam list-users --no-cli-pager"
+                                sh "kubectl version --client"
+                                sh "j2 --version"
+                                sh "export INGRESS_LOAD_BALANCER_URL=blah; j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml"
+                                sh "cat ingress-service-deployment.yaml"
+                            }
                         }
                     } catch (err) {
                         echo "${err.getMessage()}"
@@ -213,9 +218,9 @@ pipeline {
             script {
                 try {
                     if (changesInDir(appDir)){
-                        sh "docker rmi ${dockerRepo}:${dockerTag}"
-                        sh "docker rmi ${dockerRepo}:v1.0"
-                        sh "docker rmi ${dockerRepo}:latest"
+                        sh "docker rmi ${dockerRepo}:${dockerTag} || true"
+                        sh "docker rmi ${dockerRepo}:v1.0 || true"
+                        sh "docker rmi ${dockerRepo}:latest || true"
                         sh 'docker images'
                     }
                 } catch (err) {
