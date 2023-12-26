@@ -1,8 +1,9 @@
+ARG DEMO_APP_VERSION=4.9.7
 FROM node:16-alpine
 LABEL Name="Node.js Demo App" Version=4.9.7
 LABEL org.opencontainers.image.source = "https://github.com/benc-uk/nodejs-demoapp"
 ENV NODE_ENV production
-ENV DEMO_APP_VERSION=4.9.7
+ENV DEMO_APP_VERSION=$DEMO_APP_VERSION
 WORKDIR /app 
 
 RUN wget https://github.com/benc-uk/nodejs-demoapp/archive/refs/tags/${DEMO_APP_VERSION}.tar.gz && \

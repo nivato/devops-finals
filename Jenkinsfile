@@ -43,7 +43,7 @@ pipeline {
                         dockerTag = "v1.0.${env.BUILD_NUMBER}"
                         dockerImage = docker.build(
                             "${dockerRepo}:${dockerTag}",
-                            "--build-arg APP_VERSION=${dockerTag} ."
+                            "--build-arg DEMO_APP_VERSION=4.9.7 -f demo-app/Dockerfile demo-app/."
                         )
                         sh 'docker images'
                     } catch (err) {
