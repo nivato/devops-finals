@@ -1,6 +1,61 @@
+def appDir = 'demo-app'
 def dockerRepo = 'nazarivato/devops-finals'
 def dockerTag = ''
 def dockerImage = ''
+
+@NonCPS
+def listChanges() {
+    def changes = []
+    def changeLogSets = currentBuild.changeSets;
+    for (int i = 0; i < changeLogSets.size(); i++) {
+        def entries = changeLogSets[i].items
+        for (int j = 0; j < entries.length; j++) {
+            def entry = entries[j]
+            def files = new ArrayList(entry.affectedFiles)
+            for (int k = 0; k < files.size(); k++) {
+                def file = files[k]
+                changes.push(file.path)
+            }
+        }
+    }
+    return changes
+}
+
+@NonCPS
+def changesInDir(appDirectoryName) {
+    def result = false;
+    def files = listChanges();
+    for (int i = 0; i < files.size(); i++) {
+        def filePath = files[i];
+        if (filePath.startsWith("${appDirectoryName}/")) {
+            result = true;
+            break;
+        }
+    }
+    echo "changesInDir(${appDirectoryName}): ${result}"
+    return result;
+}
+
+@NonCPS
+def changesInAnyOfDirs(directoryNames) {
+    def result = false;
+    def files = listChanges();
+    for (int i = 0; i < files.size(); i++) {
+        def file = files[i];
+        for (int j = 0; j < directoryNames.size(); j++) {
+            def appDirectoryName = directoryNames[j];
+            if (file.startsWith("${appDirectoryName}/")) {
+                result = true;
+                break;
+            }
+        }
+        if (result){
+            break;
+        }
+    }
+    echo "changesInAnyOfDirs(${directoryNames}): ${result}"
+    return result;
+}
 
 def containerIp(container) {
     sh(
@@ -20,6 +75,11 @@ pipeline {
     }
     stages {
         stage('Debug Info'){
+            when {
+                expression {
+                    changesInDir(appDir)
+                }
+            }
             steps {
                 script {
                     try {
@@ -29,6 +89,7 @@ pipeline {
                         sh 'ls -lah'
                         sh 'find . -type f -not -path "*/.git/*"'
                         sh 'docker --version'
+                        sh 'exit 1'  // TODO: remove - its for testing conditions
                     } catch (err) {
                         echo "${err.getMessage()}"
                         error("'Debug Info' Stage Failed - ${err.getMessage()}")
@@ -37,15 +98,22 @@ pipeline {
             }
         }
         stage('Docker Build'){
+            when {
+                expression {
+                    changesInDir(appDir)
+                }
+            }
             steps {
                 script {
                     try {
-                        dockerTag = "v1.0.${env.BUILD_NUMBER}"
-                        dockerImage = docker.build(
-                            "${dockerRepo}:${dockerTag}",
-                            "--build-arg DEMO_APP_VERSION=4.9.7 -f demo-app/Dockerfile demo-app/."
-                        )
-                        sh 'docker images'
+                        dir(appDir){
+                            dockerTag = "v1.0.${env.BUILD_NUMBER}"
+                            dockerImage = docker.build(
+                                "${dockerRepo}:${dockerTag}",
+                                "--build-arg DEMO_APP_VERSION=4.9.7 -f ./Dockerfile ."
+                            )
+                            sh 'docker images'
+                        }
                     } catch (err) {
                         echo "${err.getMessage()}"
                         error("'Docker Build' Stage Failed - ${err.getMessage()}")
@@ -54,6 +122,11 @@ pipeline {
             }
         }
         stage('Test Image'){
+            when {
+                expression {
+                    changesInDir(appDir)
+                }
+            }
             steps {
                 script {
                     try {
@@ -93,7 +166,12 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Image'){
+        stage('Publish Image'){
+            when {
+                expression {
+                    changesInDir(appDir)
+                }
+            }
             steps {
                 script {
                     try {
@@ -114,10 +192,12 @@ pipeline {
         always {
             script {
                 try {
-                    sh "docker rmi ${dockerRepo}:${dockerTag}"
-                    sh "docker rmi ${dockerRepo}:v1.0"
-                    sh "docker rmi ${dockerRepo}:latest"
-                    sh 'docker images'
+                    if (changesInDir(appDir)){
+                        sh "docker rmi ${dockerRepo}:${dockerTag}"
+                        sh "docker rmi ${dockerRepo}:v1.0"
+                        sh "docker rmi ${dockerRepo}:latest"
+                        sh 'docker images'
+                    }
                 } catch (err) {
                     echo "${err.getMessage()}"
                     error("'Cleanup' Stage Failed - ${err.getMessage()}")
