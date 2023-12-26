@@ -56,19 +56,14 @@ metadata:
     # These placeholders can be used as parameters in the rewrite-target annotation.
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/affinity-mode: "persistent"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
 spec:
   ingressClassName: nginx
   rules:
     - host: {{ J2.INGRESS_LOAD_BALANCER_URL }}
       http:
         paths:
-          - path: /(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: north-service
-                port:
-                  number: 80
 {% for DIRECTION in ['north', 'south', 'west', 'east'] %}
           - path: /{{ DIRECTION }}(.*)
             pathType: ImplementationSpecific
@@ -78,4 +73,11 @@ spec:
                 port:
                   number: 80
 {% endfor %}
+          - path: /(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: north-service
+                port:
+                  number: 80
 ---
