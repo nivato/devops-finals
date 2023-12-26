@@ -123,7 +123,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: { { DIRECTION } }-service
+                name: {{ DIRECTION }}-service
                 port:
                   number: 80
           - path: /{{ DIRECTION }}/(.*)
