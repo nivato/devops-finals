@@ -89,7 +89,6 @@ pipeline {
                         sh 'ls -lah'
                         sh 'find . -type f -not -path "*/.git/*"'
                         sh 'docker --version'
-                        sh 'exit 1'  // TODO: remove - its for testing conditions
                     } catch (err) {
                         echo "${err.getMessage()}"
                         error("'Debug Info' Stage Failed - ${err.getMessage()}")
