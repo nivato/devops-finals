@@ -62,6 +62,13 @@ spec:
     - host: {{ J2.INGRESS_LOAD_BALANCER_URL }}
       http:
         paths:
+          - path: (/)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: north-service
+                port:
+                  number: 80
 {% for DIRECTION in ['north', 'south', 'west', 'east'] %}
           - path: (/{{ DIRECTION }})(.*)
             pathType: ImplementationSpecific
