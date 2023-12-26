@@ -215,6 +215,11 @@ pipeline {
                                 sh "cat ingress-service-deployment.yaml"
                                 sh "kubectl apply -f ingress-service-deployment.yaml"
                                 sh "kubectl get services --namespace=prod"
+                                sh "kubectl get deployments --namespace prod"
+                                sh "kubectl describe deployment north-deployment --namespace prod"
+                                sh "kubectl describe deployment south-deployment --namespace prod"
+                                sh "kubectl describe deployment west-deployment --namespace prod"
+                                sh "kubectl describe deployment east-deployment --namespace prod"
                                 echo "Load Balancer URL: http://${ingressLoadBalancerUrl}"
                             }
                         }
