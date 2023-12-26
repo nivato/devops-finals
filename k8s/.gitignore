@@ -1,0 +1,3 @@
+# Ignore jinja-generated manifest files
+*.yaml
+*.yml

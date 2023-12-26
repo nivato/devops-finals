@@ -181,7 +181,28 @@ pipeline {
                         }
                     } catch (err) {
                         echo "${err.getMessage()}"
-                        error("'Deploy Image' Stage Failed - ${err.getMessage()}")
+                        error("'Publish Image' Stage Failed - ${err.getMessage()}")
+                    }
+                }
+            }
+        }
+        stage('Deploy to EKS'){
+            when {
+                expression {
+                    changesInDir('k8s')
+                }
+            }
+            steps {
+                script {
+                    try {
+                        dir('k8s'){
+                            sh "j2 --version"
+                            sh "export INGRESS_LOAD_BALANCER_URL=blah; j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml"
+                            sh "cat ingress-service-deployment.yaml"
+                        }
+                    } catch (err) {
+                        echo "${err.getMessage()}"
+                        error("'Deploy to EKS' Stage Failed - ${err.getMessage()}")
                     }
                 }
             }
