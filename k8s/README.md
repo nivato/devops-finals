@@ -39,9 +39,21 @@ kubectl exec -it west-deployment-865cd6b4cf-7jvsk --namespace prod -- /bin/sh
 ```
 2. Connect to RDS Instance from pod:
 ```shell
-rds_host="mysql-db-wordpress.ckrlhms1oqdq.eu-central-1.rds.amazonaws.com"
+rds_host="devops-finals-mysql-db.ckrlhms1oqdq.eu-central-1.rds.amazonaws.com"
 admin_user="..."
 admin_password="..."
 mysql --user="$admin_user" --host="$rds_host" --password="$admin_password"
-> show databases;
+
+# > MySQL [(none)]> show databases;
+# > +---------------------+
+# > | Database            |
+# > +---------------------+
+# > | information_schema  |
+# > | devopsfinalsmysqldb |
+# > | innodb              |
+# > | mysql               |
+# > | performance_schema  |
+# > | sys                 |
+# > +---------------------+
+# > 6 rows in set (0.001 sec)
 ```
