@@ -1,4 +1,3 @@
-def appDir = 'demo-app'
 def dockerRepo = 'nazarivato/devops-finals'
 def dockerTag = ''
 def dockerImage = ''
@@ -77,7 +76,7 @@ pipeline {
         stage('Debug Info'){
             when {
                 expression {
-                    changesInDir(appDir)
+                    changesInDir('demo-app')
                 }
             }
             steps {
@@ -102,13 +101,13 @@ pipeline {
         stage('Docker Build'){
             when {
                 expression {
-                    changesInDir(appDir)
+                    changesInDir('demo-app')
                 }
             }
             steps {
                 script {
                     try {
-                        dir(appDir){
+                        dir('demo-app'){
                             dockerTag = "v1.0.${env.BUILD_NUMBER}"
                             dockerImage = docker.build(
                                 "${dockerRepo}:${dockerTag}",
@@ -126,7 +125,7 @@ pipeline {
         stage('Test Image'){
             when {
                 expression {
-                    changesInDir(appDir)
+                    changesInDir('demo-app')
                 }
             }
             steps {
@@ -171,7 +170,7 @@ pipeline {
         stage('Publish Image'){
             when {
                 expression {
-                    changesInDir(appDir)
+                    changesInDir('demo-app')
                 }
             }
             steps {
@@ -192,7 +191,7 @@ pipeline {
         stage('Deploy to EKS'){
             when {
                 expression {
-                    changesInAnyOfDirs([appDir, 'k8s'])
+                    changesInAnyOfDirs(['demo-app', 'k8s'])
                 }
             }
             steps {
@@ -201,26 +200,27 @@ pipeline {
                         dir('k8s'){
                             withAWS(credentials: 'terraform-aws-user'){
                                 sh "aws eks update-kubeconfig --region eu-central-1 --name devops-finals-cluster"
+                                sh "kubectl get services --all-namespaces | grep ingress-nginx"
                                 def ingressLoadBalancerUrl = sh(
                                     script: '''
                                         kubectl get services --all-namespaces | grep ingress-nginx | grep LoadBalancer | awk '{print $5}'
                                     ''',
                                     returnStdout: true,
                                 ).trim()
-                                echo "ingressLoadBalancerUrl: ${ingressLoadBalancerUrl}"
+                                echo "Load Balancer URL: http://${ingressLoadBalancerUrl}"
                                 sh """
                                     export INGRESS_LOAD_BALANCER_URL=${ingressLoadBalancerUrl}
                                     j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml
                                 """
                                 sh "cat ingress-service-deployment.yaml"
                                 sh "kubectl apply -f ingress-service-deployment.yaml"
+                                sleep 10  // seconds
                                 sh "kubectl get services --namespace=prod"
                                 sh "kubectl get deployments --namespace prod"
                                 sh "kubectl describe deployment north-deployment --namespace prod"
                                 sh "kubectl describe deployment south-deployment --namespace prod"
                                 sh "kubectl describe deployment west-deployment --namespace prod"
                                 sh "kubectl describe deployment east-deployment --namespace prod"
-                                echo "Load Balancer URL: http://${ingressLoadBalancerUrl}"
                             }
                         }
                     } catch (err) {
@@ -235,13 +235,13 @@ pipeline {
         always {
             script {
                 try {
-                    if (changesInDir(appDir)){
+                    if (changesInDir('demo-app')){
                         sh "docker rmi ${dockerRepo}:${dockerTag} || true"
                         sh "docker rmi ${dockerRepo}:v1.0 || true"
                         sh "docker rmi ${dockerRepo}:latest || true"
                         sh 'docker images'
                     }
-                    if (changesInDir('k8s')){
+                    if (changesInAnyOfDirs(['demo-app', 'k8s'])){
                         sh "kubectl config unset clusters || true"
                         sh "kubectl config unset users || true"
                         sh "kubectl config unset contexts || true"

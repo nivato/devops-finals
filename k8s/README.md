@@ -30,3 +30,18 @@ j2 ingress-service-deployment.yaml.j2 > ingress-service-deployment.yaml
 kubectl apply -f ingress-service-deployment.yaml
 ```
 
+Useful Examples
+---------------
+1. Connect to running pod:
+```shell
+kubectl get pods --namespace prod
+kubectl exec -it west-deployment-865cd6b4cf-7jvsk --namespace prod -- /bin/sh
+```
+2. Connect to RDS Instance from pod:
+```shell
+rds_host="mysql-db-wordpress.ckrlhms1oqdq.eu-central-1.rds.amazonaws.com"
+admin_user="..."
+admin_password="..."
+mysql --user="$admin_user" --host="$rds_host" --password="$admin_password"
+> show databases;
+```

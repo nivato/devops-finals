@@ -50,3 +50,13 @@ module "node_group" {
   max_size = 2
   min_size = 2
 }
+
+module "rds" {
+  source = "./modules/rds"
+  providers = {
+    aws = aws.frankfurt
+  }
+  name_prefix = local.prefix
+  vpc_id = module.vpc.vpc_id
+  subnet_ids = [module.vpc.first_private_subnet_id, module.vpc.second_private_subnet_id]
+}

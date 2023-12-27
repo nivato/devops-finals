@@ -12,7 +12,7 @@ RUN wget https://github.com/benc-uk/nodejs-demoapp/archive/refs/tags/${DEMO_APP_
     cp -r nodejs-demoapp-${DEMO_APP_VERSION}/src/package*.json ./ && \
     npm install --production --silent && \
     apk update && \
-    apk add nginx
+    apk add nginx mysql-client
 
 COPY nginx/default.conf /etc/nginx/http.d/
 
